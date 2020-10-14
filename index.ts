@@ -2,12 +2,13 @@
 
 'use strict'
 
-var ECMA_SIZES = require('./byte_size')
+import { ECMA_SIZES } from './byte_size';
+
 var Buffer = require('buffer/').Buffer
 
-function allProperties(obj) {
+function allProperties(obj: any) {
   const stringProperties = []
-  for (var prop in obj) { 
+  for (var prop in obj) {
       stringProperties.push(prop)
   }
   if (Object.getOwnPropertySymbols) {
@@ -17,7 +18,7 @@ function allProperties(obj) {
   return stringProperties
 }
 
-function sizeOfObject (seen, object) {
+function sizeOfObject (seen: any, object: any) {
   if (object == null) {
     return 0
   }
@@ -49,8 +50,8 @@ function sizeOfObject (seen, object) {
   return bytes
 }
 
-function getCalculator (seen) {
-  return function calculator(object) {
+function getCalculator (seen: any) {
+  return function calculator(object: any): number {
     if (Buffer.isBuffer(object)) {
       return object.length
     }
@@ -65,7 +66,9 @@ function getCalculator (seen) {
         return ECMA_SIZES.NUMBER
       case 'symbol':
         const isGlobalSymbol = Symbol.keyFor && Symbol.keyFor(object)
-        return isGlobalSymbol ? Symbol.keyFor(object).length * ECMA_SIZES.STRING : (object.toString().length - 8) * ECMA_SIZES.STRING 
+        return Symbol.keyFor && Symbol.keyFor(object)
+            ? Symbol.keyFor(object)!.length * ECMA_SIZES.STRING
+            : (object.toString().length - 8) * ECMA_SIZES.STRING
       case 'object':
         if (Array.isArray(object)) {
           return object.map(getCalculator(seen)).reduce(function (acc, curr) {
@@ -86,8 +89,8 @@ function getCalculator (seen) {
  * @param object - handles object/string/boolean/buffer
  * @returns {*}
  */
-function sizeof (object) {
+export function sizeof (object: any) {
   return getCalculator(new WeakSet())(object)
 }
 
-module.exports = sizeof
+export default sizeof;
